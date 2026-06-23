@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slot Rogue Battle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Title Screen -->
+        <div id="screen-title" class="screen active">
+            <div class="title-logo">SLOT ROGUE BATTLE</div>
+            <p class="title-sub">スロット × ローグライク</p>
+            <button class="btn btn-primary" onclick="game.showCharacterSelect()">START</button>
+        </div>
+
+        <!-- Character Select -->
+        <div id="screen-charselect" class="screen">
+            <h2>キャラクター選択</h2>
+            <div class="char-cards">
+                <div class="char-card" onclick="game.selectCharacter('striker')">
+                    <div class="char-icon">⚔️</div>
+                    <h3>ストライカー</h3>
+                    <div class="char-stats">HP: 80 / Spins: 2</div>
+                    <p class="char-desc">目押しゲージが貯まると精密停止が可能。<br>回転速度UP↔ステータス強化のトレードオフ。</p>
+                    <div class="char-mechanic">固有: 目押しゲージ</div>
+                </div>
+                <div class="char-card" onclick="game.selectCharacter('berserker')">
+                    <div class="char-icon">🔥</div>
+                    <h3>バーサーカー</h3>
+                    <div class="char-stats">HP: 70 / Spins: 2</div>
+                    <p class="char-desc">自傷効果と引き換えに高火力を叩き出す。<br>HPを削るほどダメージ倍率UP。</p>
+                    <div class="char-mechanic">固有: バーサーク</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Screen -->
+        <div id="screen-map" class="screen">
+            <div class="map-header">
+                <div class="player-info-bar">
+                    <span id="map-hp">HP: 80/80</span>
+                    <span id="map-gold">Gold: 100</span>
+                    <span id="map-floor">Floor: 1</span>
+                </div>
+            </div>
+            <h2>マップ</h2>
+            <div id="map-container" class="map-container"></div>
+        </div>
+
+        <!-- Battle Screen -->
+        <div id="screen-battle" class="screen">
+            <div class="battle-layout">
+                <!-- Enemy Area -->
+                <div class="enemy-area">
+                    <div id="enemy-name" class="enemy-name">Slime</div>
+                    <div class="enemy-visual" id="enemy-visual">
+                        <div id="enemy-sprite" class="enemy-sprite">👾</div>
+                        <div id="enemy-intent" class="enemy-intent"></div>
+                    </div>
+                    <div class="hp-bar-container">
+                        <div class="hp-bar" id="enemy-hp-bar">
+                            <div class="hp-fill enemy-hp-fill" id="enemy-hp-fill"></div>
+                        </div>
+                        <span class="hp-text" id="enemy-hp-text">40/40</span>
+                        <span class="block-text" id="enemy-block-text"></span>
+                    </div>
+                </div>
+
+                <!-- Slot Machine -->
+                <div class="slot-area">
+                    <div class="slot-machine">
+                        <div class="reel-container">
+                            <div class="reel" id="reel-0">
+                                <div class="reel-label">Reel 1</div>
+                                <div class="reel-window" id="reel-window-0">---</div>
+                                <button class="btn btn-stop" id="stop-btn-0" onclick="game.stopReel(0)" disabled>STOP</button>
+                            </div>
+                            <div class="reel" id="reel-1">
+                                <div class="reel-label">Reel 2</div>
+                                <div class="reel-window" id="reel-window-1">---</div>
+                                <button class="btn btn-stop" id="stop-btn-1" onclick="game.stopReel(1)" disabled>STOP</button>
+                            </div>
+                            <div class="reel" id="reel-2">
+                                <div class="reel-label">Reel 3</div>
+                                <div class="reel-window" id="reel-window-2">---</div>
+                                <button class="btn btn-stop" id="stop-btn-2" onclick="game.stopReel(2)" disabled>STOP</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="battle-controls">
+                        <button class="btn btn-spin" id="spin-btn" onclick="game.spin()">SPIN</button>
+                        <button class="btn btn-endturn" id="endturn-btn" onclick="game.endTurn()">END TURN</button>
+                    </div>
+                </div>
+
+                <!-- Player Area -->
+                <div class="player-area">
+                    <div class="player-status">
+                        <div class="hp-bar-container">
+                            <div class="hp-bar" id="player-hp-bar">
+                                <div class="hp-fill player-hp-fill" id="player-hp-fill"></div>
+                            </div>
+                            <span class="hp-text" id="player-hp-text">80/80</span>
+                            <span class="block-text" id="player-block-text"></span>
+                        </div>
+                        <div id="spin-count" class="spin-count">Spins: 2</div>
+                        <div id="turn-count" class="turn-count">Turn 1</div>
+                        <div id="player-statuses" class="status-icons"></div>
+                    </div>
+                    <!-- Character Mechanic -->
+                    <div id="mechanic-area" class="mechanic-area"></div>
+                </div>
+            </div>
+
+            <!-- Battle Log -->
+            <div class="battle-log" id="battle-log"></div>
+
+            <!-- Damage Popup Container -->
+            <div id="damage-popups"></div>
+        </div>
+
+        <!-- Reward Screen -->
+        <div id="screen-reward" class="screen">
+            <h2>VICTORY!</h2>
+            <p id="gold-reward" class="gold-reward"></p>
+            <h3>スキルを1つ選択</h3>
+            <div id="reward-cards" class="reward-cards"></div>
+            <div id="reel-assign" class="reel-assign hidden">
+                <h3>どのリールに追加する？</h3>
+                <div class="reel-assign-buttons">
+                    <button class="btn btn-reel" onclick="game.assignToReel(0)">Reel 1</button>
+                    <button class="btn btn-reel" onclick="game.assignToReel(1)">Reel 2</button>
+                    <button class="btn btn-reel" onclick="game.assignToReel(2)">Reel 3</button>
+                </div>
+            </div>
+            <button class="btn btn-skip" onclick="game.skipReward()">スキップ</button>
+        </div>
+
+        <!-- Shop Screen -->
+        <div id="screen-shop" class="screen">
+            <h2>ショップ</h2>
+            <div class="shop-header">
+                <span id="shop-gold">Gold: 100</span>
+            </div>
+            <div id="shop-items" class="shop-items"></div>
+            <div id="shop-reel-assign" class="reel-assign hidden">
+                <h3>どのリールに追加する？</h3>
+                <div class="reel-assign-buttons">
+                    <button class="btn btn-reel" onclick="game.shopAssignToReel(0)">Reel 1</button>
+                    <button class="btn btn-reel" onclick="game.shopAssignToReel(1)">Reel 2</button>
+                    <button class="btn btn-reel" onclick="game.shopAssignToReel(2)">Reel 3</button>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="game.leaveShop()">出発</button>
+        </div>
+
+        <!-- Rest Screen -->
+        <div id="screen-rest" class="screen">
+            <h2>休憩所</h2>
+            <div class="rest-content">
+                <p id="rest-hp">HP: 80/80</p>
+                <button class="btn btn-primary" id="rest-heal-btn" onclick="game.restHeal()">
+                    回復 (HP 30%回復)
+                </button>
+                <button class="btn btn-primary" onclick="game.leaveRest()">出発</button>
+            </div>
+        </div>
+
+        <!-- Game Over -->
+        <div id="screen-gameover" class="screen">
+            <h2 id="gameover-title">GAME OVER</h2>
+            <p id="gameover-info"></p>
+            <button class="btn btn-primary" onclick="game.restart()">タイトルへ</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

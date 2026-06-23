@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: slot-rogue-battle
+    runtime: static
+    buildCommand: echo "Static site, no build needed"
+    staticPublishPath: ./web
+    pullRequestPreviewsEnabled: true
